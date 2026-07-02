@@ -1,40 +1,54 @@
 `timescale 1ns/1ps
 
-module full_adder_structural_tb;
+module ripple_carry_adder_tb;
 
-logic A;
-logic B;
-logic Cin;
+parameter WIDTH = 8;
 
-logic SUM;
-logic Cout;
+logic [WIDTH-1:0] A;
+logic [WIDTH-1:0] B;
+logic             Cin;
 
-full_adder_structural dut(
+logic [WIDTH-1:0] SUM;
+logic             Cout;
 
-.A(A),
-.B(B),
-.Cin(Cin),
-.SUM(SUM),
-.Cout(Cout)
+logic [WIDTH:0] expected;
 
+ripple_carry_adder #(
+    .WIDTH(WIDTH)
+) dut (
+    .A(A),
+    .B(B),
+    .Cin(Cin),
+    .SUM(SUM),
+    .Cout(Cout)
 );
 
 initial begin
 
-for(int i=0;i<8;i++) begin
+    $display("======================================");
+    $display("Ripple Carry Adder Testbench");
+    $display("======================================");
 
-    {A,B,Cin}=i;
+    repeat (20) begin
 
-    #10;
+        A   = $urandom;
+        B   = $urandom;
+        Cin = $urandom_range(0,1);
 
-    if({Cout,SUM}!=(A+B+Cin))
-        $error("FAILED");
+        #10;
 
-end
+        expected = A + B + Cin;
 
-$display("All Tests Passed");
+        if ({Cout,SUM} !== expected)
+            $error("FAILED : A=%0d B=%0d Cin=%0d Expected=%0d Got=%0d",
+                   A,B,Cin,expected,{Cout,SUM});
+    end
 
-$finish;
+    $display("======================================");
+    $display("ALL TESTS PASSED");
+    $display("======================================");
+
+    $finish;
 
 end
 
